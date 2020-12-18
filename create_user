@@ -1,0 +1,34 @@
+#!/bin/sh
+set -e
+while getopts ":u:g:n:y:" opt; do
+    case "$opt" in
+        u)
+            UID="${OPTARG}"
+            ;;
+        g)
+            GID="${OPTARG}"
+            ;;
+        n)
+            USERNAME="${OPTARG}"
+            ;;
+        y)
+            if [ ! -d "${OPTARG}" ] ; then
+                echo "error: Invalid Yocto directory ${OPTARG}" >&2; exit 1
+            fi
+            YOCTO_DIR="${OPTARG}"
+            ;;
+        \?)
+            echo "error: Invalid option: -${OPTARG}" >&2; exit 1
+            ;;
+        :)
+            echo "Option -${OPTARG} requires an argument" >&2; exit 1
+            ;;
+    esac
+done
+
+echo "Creating user '${USERNAME}' with UID ${UID} in group '${GROUP}' with GID ${GID}"
+groupadd -g ${GID} ${GROUP}
+useradd -g ${GID} -m -s /bin/bash -u ${UID} ${USERNAME}
+
+echo "Setting permissions in ${YOCTO_DIR}"
+chown -R ${USERNAME}:${GROUP} ${YOCTO_DIR}

@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+JDK_FETCH=false
+while getopts ":ji:" opt; do
+    case "$opt" in
+        j)
+            JDK_FETCH=true
+            ;;
+        i)
+            IMAGE="${OPTARG}"
+            ;;
+        \?)
+            echo "error: Invalid option: -${OPTARG}" >&2; exit 1
+            ;;
+        :)
+            echo "Option -${OPTARG} requires an argument" >&2; exit 1
+            ;;
+    esac
+done
+
+cd ${YOCTO_DIR} && source ${YOCTO_DIR}/poky/oe-init-build-env build
+
+if [[ ${JDK_FETCH} == true ]]
+then
+    echo "Fetching openjdk-8 and openjdk-8 native"
+    bitbake -c fetch openjdk-8 openjdk-8-native
+fi
+bitbake ${IMAGE}

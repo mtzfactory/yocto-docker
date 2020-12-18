@@ -1,0 +1,15 @@
+#!/bin/sh
+if [ -d "${YOCTO_DIR}/build/tmp/deploy/images" ]
+then
+    DATETIME=$(date +%Y%m%d_%H%M%S)
+    mkdir -p ${YOCTO_DIR}/build/tmp/deploy/images/old/${DATETIME}
+    chown -R ${USERNAME}:${GROUP} ${YOCTO_DIR}/build/tmp/deploy/images/old
+    mv ${YOCTO_DIR}/build/tmp/deploy/images/old ${YOCTO_DIR}/build/tmp/deploy/images/.old
+    if [ "$(ls ${YOCTO_DIR}/build/tmp/deploy/images/)" ]
+    then
+        mv ${YOCTO_DIR}/build/tmp/deploy/images/* ${YOCTO_DIR}/build/tmp/deploy/images/.old/${DATETIME}/
+    else
+        rm -r ${YOCTO_DIR}/build/tmp/deploy/images/.old/${DATETIME} 
+    fi
+    mv ${YOCTO_DIR}/build/tmp/deploy/images/.old ${YOCTO_DIR}/build/tmp/deploy/images/old
+fi
