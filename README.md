@@ -14,7 +14,8 @@ This is a Docker image to build gumstix Yocto images in a controlled Linux envir
 ***
 Clone repository with 
 ```
-$ git clone git@github.com:Yoruio/Gumstix-Yocto-Docker.git
+$ git clone git@github.com:gumstix/yocto-docker.git
+
 ```
 After cloning repository, build image with
 ```sh
