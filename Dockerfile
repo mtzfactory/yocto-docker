@@ -75,8 +75,8 @@ RUN apt update && \
   software-properties-common \
   texinfo \
   unzip \
-  wget \
   vim \
+  wget \
   xterm
 
 # Set locale - required for bitbake
@@ -90,14 +90,17 @@ RUN apt update && \
   python
 
 # misc utils
-COPY runbb /usr/local/bin
-RUN chmod a+x /usr/local/bin/runbb
+COPY scripts/backup_images /usr/local/bin
+RUN chmod a+x /usr/local/bin/backup_images
 
-COPY create_user /usr/local/bin
+COPY scripts/create_user /usr/local/bin
 RUN chmod a+x /usr/local/bin/create_user
 
-COPY backup_images /usr/local/bin
-RUN chmod a+x /usr/local/bin/backup_images
+COPY scripts/runbb /usr/local/bin
+RUN chmod a+x /usr/local/bin/runbb
+
+# Set yocto root directory (directory with build/ and poky/) -> even though user hasnt been created yet, this is needed to clone yocto-manifest into.
+ENV YOCTO_DIR /gumstix/yocto
 
 # Default UID and GID values - set in docker run using '-e' flag (i.e. docker run -e UID=$(id -u) yocto-build-env:latest)
 ENV UID=1001
@@ -106,22 +109,19 @@ ENV GID=1001
 ENV USERNAME=yocto
 ENV GROUP=yocto
 
-# Set yocto root directory (directory with build/ and poky/) -> even though user hasnt been created yet, this is needed to clone yocto-manifest into.
-ENV YOCTO_DIR /gumstix/yocto
-
 # Create yocto directory
 RUN mkdir -p ${YOCTO_DIR}/
 WORKDIR ${YOCTO_DIR}
 
 COPY --from=builder $HOME/gumstix/yocto/ .
 
+RUN create_user ${YOCTO_DIR} && \
+  su yocto
+
 ENV PARALLEL_MAKE="-j 8"
 ENV TEMPLATECONF=meta-gumstix-extras/conf
 
-RUN create_user ${YOCTO_DIR}
-
-# RUN su yocto && \
-#   source poky/oe-init-build-env && \
+# RUN source poky/oe-init-build-env && \
 #   bitbake -c fetchall gumstix-console-image
 
 CMD ["/bin/bash"]
