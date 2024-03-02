@@ -80,7 +80,7 @@ RUN apt update && \
   curl \
   diffstat \
   gawk \
-  $([ "$ARCH" = "x86_64" ] && echo "gcc-multilib" || echo "gcc-multilib-x86-64-linux-gnu") \
+  gcc-multilib \
   git-core \
   libsdl1.2-dev \
   locales \
