@@ -1,4 +1,8 @@
+ARG ARCH="x86_64"
+
 FROM ubuntu:20.04 AS yocto_repo
+
+ARG ARCH
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -9,7 +13,7 @@ RUN apt update && \
   curl \
   diffstat \
   gawk \
-  gcc-multilib-x86-64-linux-gnu \
+  $([ "$ARCH" = "x86_64" ] && echo "gcc-multilib" || echo "gcc-multilib-x86-64-linux-gnu") \
   git-core \
   libsdl1.2-dev \
   locales \
@@ -65,6 +69,8 @@ CMD ["/bin/bash"]
 
 FROM ubuntu:14.04.5 AS yocto
 
+ARG ARCH
+
 SHELL ["/bin/bash", "-c"]
 
 RUN apt update && \
@@ -74,7 +80,7 @@ RUN apt update && \
   curl \
   diffstat \
   gawk \
-  gcc-multilib \
+  $([ "$ARCH" = "x86_64" ] && echo "gcc-multilib" || echo "gcc-multilib-x86-64-linux-gnu") \
   git-core \
   libsdl1.2-dev \
   locales \
