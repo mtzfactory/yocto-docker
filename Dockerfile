@@ -1,8 +1,14 @@
-ARG ARCH="x86_64"
+ARG ARCH=x86_64
+ARG YOCTO_DIR=/gumstix/yocto
+
+##
+###
+##
 
 FROM ubuntu:20.04 AS yocto_repo
 
 ARG ARCH
+ARG YOCTO_DIR
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
@@ -33,10 +39,10 @@ ENV LC_ALL=en_US.UTF-8
 RUN add-apt-repository ppa:deadsnakes/ppa && \
   apt install -y \
   python3 \
-  python2 \
-  && apt autoremove \
-  && apt clean \
-  && rm -rf /var/lib/apt/lists/*
+  python2 && \
+  apt autoremove && \
+  apt clean && \
+  rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2 1 && \
   update-alternatives --install /usr/bin/python python /usr/bin/python3 2
@@ -47,8 +53,6 @@ RUN chmod a+x repo && \
   mv repo /usr/local/bin
 
 # Create yocto directory
-ENV YOCTO_DIR /gumstix/yocto
-
 RUN mkdir -p ${YOCTO_DIR}/
 WORKDIR ${YOCTO_DIR}
 
@@ -70,6 +74,7 @@ CMD ["/bin/bash"]
 FROM ubuntu:14.04.5 AS yocto
 
 ARG ARCH
+ARG YOCTO_DIR
 
 SHELL ["/bin/bash", "-c"]
 
@@ -114,10 +119,23 @@ COPY scripts/runbb /usr/local/bin
 RUN chmod a+x /usr/local/bin/runbb
 
 # Create yocto directory
-ENV YOCTO_DIR /gumstix/yocto
-
 RUN mkdir -p ${YOCTO_DIR}/
 WORKDIR ${YOCTO_DIR}
+
+# Copy from previous build
+COPY --from=yocto_repo /gumstix/yocto/ .
+
+# Init build environment
+ENV TEMPLATECONF=meta-gumstix-extras/conf
+RUN source poky/oe-init-build-env
+
+# Copy overo customization
+COPY overo/build/conf/local.conf ${YOCTO_DIR}/build/conf/local.conf
+COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
+  ${YOCTO_DIR}/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
+
+# Copy Makefile
+COPY scripts/Makefile ${YOCTO_DIR}/Makefile
 
 # Create bitbake user
 ENV UID=1001
@@ -126,21 +144,7 @@ ENV GID=1001
 ENV USERNAME=yocto
 ENV GROUP=yocto
 
-RUN create_user && \
-  su yocto
-
-# Copy from previous build
-COPY --from=yocto_repo /gumstix/yocto/ .
-
-# Init build environment
-ENV TEMPLATECONF=meta-gumstix-extras/conf
-RUN echo "$PWD"
-RUN source poky/oe-init-build-env
-
-# Copy overo customization
-COPY overo/build/conf/local.conf ${YOCTO_DIR}/build/conf/local.conf
-COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
-  ${YOCTO_DIR}/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
+RUN create_user
 
 CMD ["/bin/bash"]
 
@@ -150,18 +154,13 @@ CMD ["/bin/bash"]
 
 FROM yocto AS gumstix_overo
 
+ARG YOCTO_DIR
+
 SHELL ["/bin/bash", "-c"]
 
-RUN su yocto
-
-ENV YOCTO_DIR /gumstix/yocto
 WORKDIR ${YOCTO_DIR}
-
-COPY scripts/Makefile ${YOCTO_DIR}/Makefile
-COPY scripts/yocto.env ${YOCTO_DIR}/yocto.env
 
 # Init build environment
 ENV TEMPLATECONF=meta-gumstix-extras/conf
-RUN . poky/oe-init-build-env
 
 CMD ["/bin/bash"]
