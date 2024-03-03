@@ -1,14 +1,5 @@
 SHELL := /bin/bash
 
-export TEMPLATECONF=meta-gumstix-extras/conf
-
-.PHONY: check-env build
-
-ifneq (,$(wildcard ./yocto.env))
-	include yocto.env
-	export
-endif
-
 guard-%:
 	@if [ "${${*}}" = "" ]; then \
 		echo "Environment variable $* not set"; \
@@ -25,14 +16,14 @@ ifeq ($(shell id -u), 0)
 endif
 
 fetch-all: check-env no-root-user
-	. poky/oe-init-build-env; \
-	cp ../local.conf conf/local.conf; \
+	source poky/oe-init-build-env; \
 	bitbake -c fetchall gumstix-console-image
 
+.PHONY: build
 build: check-env no-root-user
-	. poky/oe-init-build-env; \
+	source poky/oe-init-build-env; \
 	bitbake gumstix-console-image
 
 sdk: check-env no-root-user
-	. poky/oe-init-build-env; \
+	source poky/oe-init-build-env; \
 	bitbake -c populate_sdk gumstix-console-image
