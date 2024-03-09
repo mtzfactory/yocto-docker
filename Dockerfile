@@ -1,5 +1,6 @@
-ARG ARCH=x86_64
-ARG YOCTO_DIR=/gumstix/yocto
+ARG YOCTO_REPO=/root/yocto
+ARG YOCTO_DIR=/home/yocto
+ARG USERNAME=yocto
 
 ##
 ###
@@ -7,45 +8,23 @@ ARG YOCTO_DIR=/gumstix/yocto
 
 FROM ubuntu:20.04 AS yocto_repo
 
-ARG ARCH
-ARG YOCTO_DIR
+ARG YOCTO_REPO
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-RUN apt update && \
-  apt install -y \
-  build-essential \
-  chrpath \
-  curl \
-  diffstat \
-  gawk \
-  $([ "$ARCH" = "x86_64" ] && echo "gcc-multilib" || echo "gcc-multilib-x86-64-linux-gnu") \
+# Install packages
+RUN apt-get update && \
+  apt-get install -y \
   git-core \
-  libsdl1.2-dev \
-  locales \
-  software-properties-common \
-  texinfo \
-  unzip \
-  wget \
-  xterm
-
-# Set locale - required for bitbake
-RUN locale-gen en_US.UTF-8 && \
-  update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+  software-properties-common
 
 # Add python
 RUN add-apt-repository ppa:deadsnakes/ppa && \
-  apt install -y \
-  python3 \
-  python2 && \
-  apt autoremove && \
-  apt clean && \
+  apt-get install -y \
+  python3 && \
+  apt-get autoremove && \
+  apt-get clean && \
   rm -rf /var/lib/apt/lists/*
-
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python2 1 && \
-  update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # Download repo tool
 ADD http://commondatastorage.googleapis.com/git-repo-downloads/repo repo
@@ -53,8 +32,8 @@ RUN chmod a+x repo && \
   mv repo /usr/local/bin
 
 # Create yocto directory
-RUN mkdir -p ${YOCTO_DIR}/
-WORKDIR ${YOCTO_DIR}
+RUN mkdir -p ${YOCTO_REPO}/
+WORKDIR ${YOCTO_REPO}
 
 # Configure git
 RUN git config --global user.email "ricardo.martinez.monje@gmail.com" && \
@@ -73,13 +52,15 @@ CMD ["/bin/bash"]
 
 FROM ubuntu:14.04.5 AS yocto
 
-ARG ARCH
+ARG YOCTO_REPO
 ARG YOCTO_DIR
+ARG USERNAME
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt update && \
-  apt install -y \
+# Install packages
+RUN apt-get update && \
+  apt-get install -y \
   build-essential \
   chrpath \
   curl \
@@ -104,7 +85,7 @@ ENV LC_ALL=en_US.UTF-8
 
 # Add python
 RUN add-apt-repository ppa:deadsnakes/ppa && \
-  apt install -y \
+  apt-get install -y \
   python && \
   rm -rf /var/lib/apt/lists/*
 
@@ -118,12 +99,22 @@ RUN chmod a+x /usr/local/bin/create_user
 COPY scripts/runbb /usr/local/bin
 RUN chmod a+x /usr/local/bin/runbb
 
-# Create yocto directory
-RUN mkdir -p ${YOCTO_DIR}/
+# Create bitbake user
+ENV UID 1001
+ENV GID 1001
+ENV GROUP yocto
+
+RUN create_user
+
+# Use yocto directory
 WORKDIR ${YOCTO_DIR}
 
-# Copy from previous build
-COPY --from=yocto_repo /gumstix/yocto/ .
+# Copy repo from previous build
+COPY --from=yocto_repo ${YOCTO_REPO} .
+RUN chown -R ${USERNAME}:${GROUP} .
+
+# Switch to user
+USER ${USERNAME}
 
 # Init build environment
 ENV TEMPLATECONF=meta-gumstix-extras/conf
@@ -137,15 +128,6 @@ COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.b
 # Copy Makefile
 COPY scripts/Makefile ${YOCTO_DIR}/Makefile
 
-# Create bitbake user
-ENV UID=1001
-ENV GID=1001
-
-ENV USERNAME=yocto
-ENV GROUP=yocto
-
-RUN create_user
-
 CMD ["/bin/bash"]
 
 ##
@@ -155,8 +137,9 @@ CMD ["/bin/bash"]
 FROM yocto AS gumstix_overo
 
 ARG YOCTO_DIR
+ARG USERNAME
 
-SHELL ["/bin/bash", "-c"]
+USER ${USERNAME}
 
 WORKDIR ${YOCTO_DIR}
 
