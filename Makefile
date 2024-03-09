@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-YOCTO_VOLUME_NAME := yocto_build
+YOCTO_VOLUME_NAME := yocto
 YOCTO_VOLUME = $(shell docker volume ls --filter name=${YOCTO_VOLUME_NAME} --quiet)
 
 .PHONY: build
@@ -15,6 +15,6 @@ volume:
 
 run: volume
 	@docker run --rm -it \
-		-v ${YOCTO_VOLUME_NAME}:/gumstix/yocto/build \
+		-v ${YOCTO_VOLUME_NAME}:/home/yocto \
 		--platform linux/amd64 \
 		gumstix-overo-image:latest
