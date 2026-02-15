@@ -16,33 +16,32 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 RUN apt-get update && \
   apt-get install -y \
   git-core \
-  software-properties-common
+  software-properties-common;
 
 # Add python
-RUN add-apt-repository ppa:deadsnakes/ppa && \
-  apt-get install -y \
-  python3 && \
+RUN add-apt-repository "ppa:deadsnakes/ppa" && \
+  apt-get install -y python3 && \
   apt-get autoremove && \
   apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/*;
 
 # Download repo tool
 ADD http://commondatastorage.googleapis.com/git-repo-downloads/repo repo
 RUN chmod a+x repo && \
-  mv repo /usr/local/bin
+  mv repo /usr/local/bin;
 
 # Create yocto directory
-RUN mkdir -p ${YOCTO_REPO}/
+RUN mkdir -p "${YOCTO_REPO}/"
 WORKDIR ${YOCTO_REPO}
 
 # Configure git
-RUN git config --global user.email "ricardo.martinez.monje@gmail.com" && \
+RUN git config --global user.email "200234+mtzfactory@users.noreply.github.com" && \
   git config --global user.name "mtzfactory" && \
-  git config --global url."https://".insteadOf git://
+  git config --global url."https://".insteadOf "git://"
 
 # Clone yocto manifest
-RUN repo init -u git://github.com/gumstix/yocto-manifest.git -b refs/tags/daisy && \
-  repo sync
+RUN repo init -u "git://github.com/gumstix/yocto-manifest.git" -b refs/tags/daisy && \
+  repo sync;
 
 CMD ["/bin/bash"]
 
@@ -75,11 +74,11 @@ RUN apt-get update && \
   unzip \
   vim \
   wget \
-  xterm
+  xterm;
 
 # Set locale - required for bitbake
 RUN locale-gen en_US.UTF-8 && \
-  update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+  update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8;
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
@@ -87,47 +86,53 @@ ENV LC_ALL=en_US.UTF-8
 RUN add-apt-repository ppa:deadsnakes/ppa && \
   apt-get install -y \
   python && \
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/*;
 
 # Misc utils
 COPY scripts/backup_images /usr/local/bin
-RUN chmod a+x /usr/local/bin/backup_images
+RUN chmod a+x /usr/local/bin/backup_images;
 
 COPY scripts/create_user /usr/local/bin
-RUN chmod a+x /usr/local/bin/create_user
+RUN chmod a+x /usr/local/bin/create_user;
 
 COPY scripts/runbb /usr/local/bin
-RUN chmod a+x /usr/local/bin/runbb
+RUN chmod a+x /usr/local/bin/runbb;
+
+COPY scripts/entrypoint /usr/local/bin
+RUN chmod a+x /usr/local/bin/entrypoint;
 
 # Create bitbake user
-ENV UID 1001
-ENV GID 1001
-ENV GROUP yocto
+ARG UID=1000
+ARG GID=1000
+ENV UID=${UID}
+ENV GID=${GID}
+ENV GROUP=yocto
 
-RUN create_user
+RUN create_user;
 
 # Use yocto directory
 WORKDIR ${YOCTO_DIR}
 
 # Copy repo from previous build
 COPY --from=yocto_repo ${YOCTO_REPO} .
-RUN chown -R ${USERNAME}:${GROUP} .
+RUN chown -R ${USERNAME}:${GROUP} .;
 
 # Switch to user
 USER ${USERNAME}
 
 # Init build environment
 ENV TEMPLATECONF=meta-gumstix-extras/conf
-RUN source poky/oe-init-build-env
+RUN source poky/oe-init-build-env;
 
-# Copy overo customization
-COPY overo/build/conf/local.conf ${YOCTO_DIR}/build/conf/local.conf
+# Copy overo customization templates (applied by runbb after oe-init-build-env)
+COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
 COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
-  ${YOCTO_DIR}/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
+  /usr/local/share/yocto-overo/raw2rgbpnm_git.bb
 
-# Copy Makefile
-COPY scripts/Makefile ${YOCTO_DIR}/Makefile
+# Stage Makefile for entrypoint deployment
+COPY scripts/Makefile /usr/local/share/yocto/Makefile
 
+ENTRYPOINT ["entrypoint"]
 CMD ["/bin/bash"]
 
 ##

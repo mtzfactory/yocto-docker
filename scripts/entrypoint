@@ -1,0 +1,5 @@
+#!/bin/bash
+# Deploy files that may be hidden by volume/bind mounts
+cp -n /usr/local/share/yocto/Makefile ./Makefile 2>/dev/null || true
+
+exec "$@"
