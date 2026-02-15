@@ -20,6 +20,12 @@ done
 
 cd ${YOCTO_DIR} && source ${YOCTO_DIR}/poky/oe-init-build-env build
 
+# Apply overo customizations (templates live outside the volume mount)
+cp /usr/local/share/yocto-overo/local.conf ${YOCTO_DIR}/build/conf/local.conf
+mkdir -p ${YOCTO_DIR}/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm
+cp /usr/local/share/yocto-overo/raw2rgbpnm_git.bb \
+  ${YOCTO_DIR}/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
+
 if [[ ${JDK_FETCH} == true ]]
 then
     echo "Fetching openjdk-8 and openjdk-8 native"
