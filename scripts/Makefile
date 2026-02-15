@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+IMAGE ?= gumstix-console-image
 
 guard-%:
 	@if [ "${${*}}" = "" ]; then \
@@ -15,15 +16,25 @@ ifeq ($(shell id -u), 0)
 	@exit 1
 endif
 
-fetch-all: check-env no-root-user
-	source poky/oe-init-build-env; \
-	bitbake -c fetchall gumstix-console-image
+deploy:
+	@cp /usr/local/share/yocto-overo/local.conf build/conf/local.conf
+	@mkdir -p poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm
+	@cp /usr/local/share/yocto-overo/raw2rgbpnm_git.bb \
+	  poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
 
 .PHONY: build
-build: check-env no-root-user
+build: check-env no-root-user deploy
 	source poky/oe-init-build-env; \
-	bitbake gumstix-console-image
+	bitbake ${IMAGE}
 
-sdk: check-env no-root-user
+fetch-all: check-env no-root-user deploy
 	source poky/oe-init-build-env; \
-	bitbake -c populate_sdk gumstix-console-image
+	bitbake -c fetchall ${IMAGE}
+
+fetch-jdk: check-env no-root-user deploy
+	source poky/oe-init-build-env; \
+	bitbake -c fetch openjdk-8 openjdk-8-native
+
+sdk: check-env no-root-user deploy
+	source poky/oe-init-build-env; \
+	bitbake -c populate_sdk ${IMAGE}

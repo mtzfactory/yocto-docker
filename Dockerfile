@@ -95,9 +95,6 @@ RUN chmod a+x /usr/local/bin/backup_images;
 COPY scripts/create_user /usr/local/bin
 RUN chmod a+x /usr/local/bin/create_user;
 
-COPY scripts/runbb /usr/local/bin
-RUN chmod a+x /usr/local/bin/runbb;
-
 COPY scripts/entrypoint /usr/local/bin
 RUN chmod a+x /usr/local/bin/entrypoint;
 
@@ -124,7 +121,7 @@ USER ${USERNAME}
 ENV TEMPLATECONF=meta-gumstix-extras/conf
 RUN source poky/oe-init-build-env;
 
-# Copy overo customization templates (applied by runbb after oe-init-build-env)
+# Copy overo customization templates (deployed by guest Makefile before builds)
 COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
 COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
   /usr/local/share/yocto-overo/raw2rgbpnm_git.bb
