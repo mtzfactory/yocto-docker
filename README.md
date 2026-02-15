@@ -22,6 +22,37 @@ After cloning repository, build image with
 $ docker build --no-cache --tag "gumstix/yocto-builder:latest" Yocto-Docker
 ```
 
+For this repository Makefile:
+```sh
+$ make build
+```
+
+If Docker build networking cannot reach git remotes, use host networking:
+```sh
+$ make build DOCKER_BUILD_NETWORK=host
+```
+
+Run container with default named volume:
+```sh
+$ make run
+```
+
+Run container with a host directory instead of Docker volume:
+```sh
+$ make run YOCTO_HOST_DIR=$PWD/yocto-data
+```
+
+To customize the container user UID/GID (defaults to 1000:1000):
+```sh
+$ make build UID=$(id -u) GID=$(id -g)
+```
+
+If using `YOCTO_HOST_DIR` and you see `Permission denied` under `/home/yocto/build`,
+fix host directory ownership to match the container `yocto` user (default `UID:GID 1000:1000`):
+```sh
+$ sudo chown -R 1000:1000 $PWD/yocto-data
+```
+
 ### Building Yocto image without modification
 #### Start container and build Yocto with default settings:
 <!--*If you made changes to Yocto, skip this.*-->
