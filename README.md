@@ -53,65 +53,28 @@ fix host directory ownership to match the container `yocto` user (default `UID:G
 $ sudo chown -R 1000:1000 $PWD/yocto-data
 ```
 
-### Building Yocto image without modification
-#### Start container and build Yocto with default settings:
-<!--*If you made changes to Yocto, skip this.*-->
+### Workflow
+
+1. **Build the Docker image** (host):
 ```sh
-$ docker run --rm -it \
-  -v [host output directory]/output:/yocto/build/tmp/deploy/images \
-  -v [host downloads directory]:/yocto/build/downloads \
-  -e MACHINE=[machine name] \
-  -e IMAGE=[image name] \
-  -e UID=$(id -u) -e GID=$(id -g) \
-  gumstix/yocto-builder:latest
-```
-**[host output directory]:** The directory on the host machine where images will be sent to after the build is completed.
-
-**[host downloads directory]:** A directory on the host machine where downloaded sources will be saved. This is optional if you don't want to reuse sources between builds.
-
-**[machine name]:** Machine that the image will be installed on, e.g. *raspberrypi4-64* or *overo* (default raspberrypi4-64)
-
-**[image name]:** Image(s) that yocto will build, separated by spaces. e.g. *gumstix-console-image packagegroup-gumstix*  (default gumstix-console-image)
-
-for example, building gumstix-lxqt-image for raspberrypi4-64, outputting to the ~/gumstix-image/ directory, and without persistent downloads:
-```sh
-$ docker run --rm -it \
-  -v ~/gumstix-image:/yocto/build/tmp/deploy/images \
-  -e MACHINE=raspberrypi4-64 \
-  -e IMAGE=gumstix-lxqt-image \
-  -e UID=$(id -u) -e GID=$(id -g) \
-  gumstix/yocto-builder:latest
+$ make build
 ```
 
-### Making changes to Yocto
-Start and enter Docker container to make changes:
+2. **Start the container** (host):
 ```sh
-$ docker run -it --entrypoint=/bin/bash \
-  -v [host output directory]/output:/yocto/build/tmp/deploy/images \
-  -v [host downloads directory]:/yocto/build/downloads \
-  -e UID=$(id -u) -e GID=$(id -g) \
-  gumstix/yocto-builder:latest \
-  --name "gumstix_docker_image"
+$ make run
 ```
-Prepare images directory and switch to correct user for yocto build:
-```sh
-$ create_user && backup_images
-$ su - -m yocto
-```
-At this point, make any changes to yocto as necessary (new recipes, different sources, etc). Remember to also make necessary changes in `/yocto/build/conf/local.conf`, particularly the `MACHINE` variable if you are not building for the Overo.
 
-Source Poky and run Bitbake with:
+3. **Build inside the container**:
 ```sh
-$ cd /yocto
-$ source poky/oe-init-build-env
-$ bitbake [images]
+$ make build                    # build default image (gumstix-console-image)
+$ make build IMAGE=my-image     # build a custom image
+$ make fetch-all                # fetch all sources without building
+$ make fetch-jdk                # fetch openjdk-8
+$ make sdk                      # build the SDK
 ```
-***
-At any point in the process, you can exit the container by typing `exit`, and re-attach to it later on:
-```sh
-$ docker start gumstix_docker_image
-$ docker attach gumstix_docker_image
-```
+
+The guest `Makefile` automatically deploys overo configuration templates (`local.conf`, custom recipes) from staged copies before each build. This ensures the correct settings are always applied, even when using a bind-mounted host directory.
 
 For more detailed build information, see [gumstix/yocto-manifest](https://github.com/gumstix/yocto-manifest/#:~:text=Initialize%20the%20Yocto%20Project%20Build%20Environment)
 
