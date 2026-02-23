@@ -98,6 +98,11 @@ RUN chmod a+x /usr/local/bin/create_user;
 COPY scripts/entrypoint /usr/local/bin
 RUN chmod a+x /usr/local/bin/entrypoint;
 
+# wget uses GnuTLS 2.12 which has a TLS 1.2 bug (LP#1444656);
+# use curl (OpenSSL) wrapper as a drop-in replacement for BitBake fetches
+COPY scripts/wget-curl-wrapper /usr/local/bin
+RUN chmod a+x /usr/local/bin/wget-curl-wrapper;
+
 # Create bitbake user
 ARG UID=1000
 ARG GID=1000

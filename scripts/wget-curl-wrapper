@@ -1,0 +1,64 @@
+#!/bin/bash
+# Translate wget arguments to curl for TLS 1.2+ compatibility.
+# Ubuntu 14.04's wget uses GnuTLS 2.12 which has a known TLS 1.2 bug
+# (LP#1444656). curl uses OpenSSL and does not have this issue.
+
+# Log invocations for debugging fetch failures
+echo "wget-curl-wrapper: $*" >> /tmp/wget-curl-wrapper.log 2>/dev/null || true
+
+output=""
+url=""
+prefix=""
+spider=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -O)
+            output="$2"
+            shift 2
+            ;;
+        -P)
+            prefix="$2"
+            shift 2
+            ;;
+        --spider)
+            spider=true
+            shift
+            ;;
+        -t|-T)
+            shift 2
+            ;;
+        -q|-nv|--passive-ftp|--no-check-certificate|--progress=*)
+            shift
+            ;;
+        -*)
+            shift
+            ;;
+        *)
+            url="$1"
+            shift
+            ;;
+    esac
+done
+
+if [[ -z "$url" ]]; then
+    echo "wget-curl-wrapper: missing URL" >&2
+    exit 1
+fi
+
+if $spider; then
+    exec curl --retry 2 --connect-timeout 30 -s -S -f -L -k -o /dev/null --head "$url"
+fi
+
+# If -O not provided, derive output from -P directory and URL filename
+# (wget saves to -P dir with the remote filename when -O is omitted)
+if [[ -z "$output" ]]; then
+    filename=$(basename "${url%%\?*}")
+    if [[ -n "$prefix" ]]; then
+        output="$prefix/$filename"
+    else
+        output="$filename"
+    fi
+fi
+
+exec curl --retry 2 --connect-timeout 30 -s -S -f -L -k -o "$output" "$url"
