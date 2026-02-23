@@ -119,6 +119,9 @@ WORKDIR ${YOCTO_DIR}
 COPY --from=yocto_repo ${YOCTO_REPO} .
 RUN chown -R ${USERNAME}:${GROUP} .;
 
+# Rewrite git:// to https:// globally (git protocol deprecated by GitHub etc.)
+RUN git config --system url."https://".insteadOf "git://"
+
 # Switch to user
 USER ${USERNAME}
 
