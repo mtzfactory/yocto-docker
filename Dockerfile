@@ -141,6 +141,13 @@ COPY overo/poky/meta-gumstix-extras/recipes-core/packagegroups/packagegroup-cli-
   /usr/local/share/yocto-overo/packagegroup-cli-tools.bbappend
 COPY overo/poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend \
   /usr/local/share/yocto-overo/vim_7.4.258.bbappend
+COPY overo/build/conf/bblayers.conf /usr/local/share/yocto-overo/bblayers.conf
+COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb \
+  /usr/local/share/yocto-overo/packagegroup-qt5.bb
+COPY overo/poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend \
+  /usr/local/share/yocto-overo/qtbase_percent.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-images/gumstix/gumstix-console-image.bbappend \
+  /usr/local/share/yocto-overo/gumstix-console-image.bbappend
 
 # Stage Makefile for entrypoint deployment
 COPY scripts/Makefile /usr/local/share/yocto/Makefile

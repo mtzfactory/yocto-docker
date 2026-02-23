@@ -33,6 +33,16 @@ deploy:
 	@mkdir -p poky/meta-gumstix-extras/recipes-support/vim
 	@cp /usr/local/share/yocto-overo/vim_7.4.258.bbappend \
 	  poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend
+	@cp /usr/local/share/yocto-overo/bblayers.conf build/conf/bblayers.conf
+	@mkdir -p poky/meta-gumstix-extras/recipes-qt/packagegroups
+	@cp /usr/local/share/yocto-overo/packagegroup-qt5.bb \
+	  poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb
+	@mkdir -p poky/meta-gumstix-extras/recipes-qt/qt5
+	@cp /usr/local/share/yocto-overo/qtbase_percent.bbappend \
+	  poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-images/gumstix
+	@cp /usr/local/share/yocto-overo/gumstix-console-image.bbappend \
+	  poky/meta-gumstix-extras/recipes-images/gumstix/gumstix-console-image.bbappend
 
 .PHONY: build
 build: check-env no-root-user deploy
