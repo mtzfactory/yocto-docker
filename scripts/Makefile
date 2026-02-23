@@ -21,6 +21,18 @@ deploy:
 	@mkdir -p poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm
 	@cp /usr/local/share/yocto-overo/raw2rgbpnm_git.bb \
 	  poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb
+	@mkdir -p poky/meta-gumstix-extras/recipes-devtools/ltrace
+	@cp /usr/local/share/yocto-overo/ltrace_git.bbappend \
+	  poky/meta-gumstix-extras/recipes-devtools/ltrace/ltrace_git.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-support/serial-utils
+	@cp /usr/local/share/yocto-overo/serial-forward_git.bbappend \
+	  poky/meta-gumstix-extras/recipes-support/serial-utils/serial-forward_git.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-core/packagegroups
+	@cp /usr/local/share/yocto-overo/packagegroup-cli-tools.bbappend \
+	  poky/meta-gumstix-extras/recipes-core/packagegroups/packagegroup-cli-tools.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-support/vim
+	@cp /usr/local/share/yocto-overo/vim_7.4.258.bbappend \
+	  poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend
 
 .PHONY: build
 build: check-env no-root-user deploy

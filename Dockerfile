@@ -133,6 +133,14 @@ RUN source poky/oe-init-build-env;
 COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
 COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
   /usr/local/share/yocto-overo/raw2rgbpnm_git.bb
+COPY overo/poky/meta-gumstix-extras/recipes-devtools/ltrace/ltrace_git.bbappend \
+  /usr/local/share/yocto-overo/ltrace_git.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-support/serial-utils/serial-forward_git.bbappend \
+  /usr/local/share/yocto-overo/serial-forward_git.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-core/packagegroups/packagegroup-cli-tools.bbappend \
+  /usr/local/share/yocto-overo/packagegroup-cli-tools.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend \
+  /usr/local/share/yocto-overo/vim_7.4.258.bbappend
 
 # Stage Makefile for entrypoint deployment
 COPY scripts/Makefile /usr/local/share/yocto/Makefile
