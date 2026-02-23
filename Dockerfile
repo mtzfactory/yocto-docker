@@ -40,7 +40,7 @@ RUN git config --global user.email "200234+mtzfactory@users.noreply.github.com" 
   git config --global url."https://".insteadOf "git://"
 
 # Clone yocto manifest
-RUN repo init -u "git://github.com/gumstix/yocto-manifest.git" -b refs/tags/daisy && \
+RUN repo init -u "git://github.com/mtzfactory/yocto-manifest.git" -b daisy-qt5 && \
   repo sync;
 
 CMD ["/bin/bash"]
