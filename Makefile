@@ -28,6 +28,6 @@ run: build volume
 	fi; \
 	docker run --rm -it \
 		$$MOUNT_ARG \
-		-v ${YOCTO_MIRROR_DIR}:/yocto-mirror:ro \
+		-v ${YOCTO_MIRROR_DIR}:/yocto-mirror \
 		--platform linux/amd64 \
 		${IMAGE_NAME}:latest
