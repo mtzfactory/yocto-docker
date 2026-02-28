@@ -40,6 +40,8 @@ deploy:
 	@mkdir -p poky/meta-gumstix-extras/recipes-qt/packagegroups
 	@cp /usr/local/share/yocto-overo/packagegroup-qt5.bb \
 	  poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb
+	@cp /usr/local/share/yocto-overo/packagegroup-qt5-toolchain-target.bbappend \
+	  poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bbappend
 	@mkdir -p poky/meta-gumstix-extras/recipes-qt/qt5
 	@cp /usr/local/share/yocto-overo/qtbase_percent.bbappend \
 	  poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend

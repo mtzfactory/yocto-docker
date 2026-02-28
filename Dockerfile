@@ -152,6 +152,8 @@ COPY overo/poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend \
 COPY overo/build/conf/bblayers.conf /usr/local/share/yocto-overo/bblayers.conf
 COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb \
   /usr/local/share/yocto-overo/packagegroup-qt5.bb
+COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bbappend \
+  /usr/local/share/yocto-overo/packagegroup-qt5-toolchain-target.bbappend
 COPY overo/poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend \
   /usr/local/share/yocto-overo/qtbase_percent.bbappend
 COPY overo/poky/meta-gumstix-extras/recipes-graphics/libgles/libgles-omap3_%.bbappend \
