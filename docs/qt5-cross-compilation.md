@@ -25,7 +25,7 @@ This runs `bitbake -c populate_sdk gumstix-console-image` and produces a
 self-extracting installer at:
 
 ```
-build/tmp/deploy/sdk/oecore-x86_64-cortexa8hf-neon-toolchain-*.sh
+build/tmp/deploy/sdk/poky-eglibc-x86_64-gumstix-console-image-cortexa8hf-vfp-neon-toolchain-1.6.3.sh
 ```
 
 On the host this maps to `../yocto-data/build/tmp/deploy/sdk/`.
@@ -33,33 +33,30 @@ On the host this maps to `../yocto-data/build/tmp/deploy/sdk/`.
 ## 2. Install the SDK on Your Development Machine
 
 ```bash
-# Copy the installer from the Yocto data directory
-cp ../yocto-data/build/tmp/deploy/sdk/oecore-*.sh ~/
-
-# Make it executable and run it
-chmod +x ~/oecore-*.sh
-~/oecore-*.sh
+cd ../yocto-data/build/tmp/deploy/sdk/
+chmod +x poky-eglibc-x86_64-gumstix-console-image-cortexa8hf-vfp-neon-toolchain-1.6.3.sh
+./poky-eglibc-x86_64-gumstix-console-image-cortexa8hf-vfp-neon-toolchain-1.6.3.sh
 ```
 
-The default install path is `/usr/local/oecore-x86_64`.  You can choose a
-custom location (e.g. `~/overo-sdk`) when prompted.
+The default install path is `/opt/poky/1.6.3`.  You can choose a custom
+location (e.g. `~/overo-sdk`) when prompted.
 
 The SDK installs:
 
 ```
-<sdk-root>/
-├── environment-setup-arm-oe-linux-gnueabihf   # source this before building
+/opt/poky/1.6.3/
+├── environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi   # source this before building
 ├── sysroots/
-│   ├── arm-oe-linux-gnueabihf/                # target sysroot (headers, libs)
+│   ├── cortexa8hf-vfp-neon-poky-linux-gnueabi/                # target sysroot
 │   │   └── usr/
 │   │       ├── include/qt5/                    # Qt5 headers
 │   │       ├── lib/                            # Qt5 & system libraries
 │   │       └── bin/                            # target binaries
-│   └── x86_64-oesdk-linux/                     # host tools
+│   └── x86_64-pokysdk-linux/                   # host tools
 │       └── usr/bin/
-│           ├── arm-oe-linux-gnueabihf/         # cross-compiler
-│           │   ├── arm-oe-linux-gnueabihf-gcc
-│           │   ├── arm-oe-linux-gnueabihf-g++
+│           ├── arm-poky-linux-gnueabi/         # cross-compiler
+│           │   ├── arm-poky-linux-gnueabi-gcc
+│           │   ├── arm-poky-linux-gnueabi-g++
 │           │   └── ...
 │           └── qt5/                            # host qmake
 │               └── qmake
@@ -72,7 +69,7 @@ The SDK installs:
 Every terminal session needs this before building:
 
 ```bash
-source /usr/local/oecore-x86_64/environment-setup-arm-oe-linux-gnueabihf
+source /opt/poky/1.6.3/environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi
 ```
 
 This sets `CC`, `CXX`, `CFLAGS`, `LDFLAGS`, `PKG_CONFIG_PATH`, `QMAKESPEC`,
@@ -82,7 +79,7 @@ and other variables pointing at the cross-toolchain and target sysroot.
 
 ```bash
 # Source the SDK environment
-source /usr/local/oecore-x86_64/environment-setup-arm-oe-linux-gnueabihf
+source /opt/poky/1.6.3/environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi
 
 # Build your project
 cd ~/my-qt-app
@@ -95,7 +92,7 @@ The resulting binary is an ARM hard-float executable ready to run on the Overo.
 ### Build with CMake
 
 ```bash
-source /usr/local/oecore-x86_64/environment-setup-arm-oe-linux-gnueabihf
+source /opt/poky/1.6.3/environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi
 
 cd ~/my-qt-app
 mkdir build && cd build
@@ -150,23 +147,23 @@ sudo apt install qtcreator qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 
 ### Add the Overo cross-compilation kit
 
-1. **Tools > Options > Devices > Add > Generic Linux Device**
+1. **Edit > Preferences > Devices > Add > Generic Linux Device**
    - Hostname: Overo's IP address
    - Username: `root`
 
-2. **Tools > Options > Compilers > Add > GCC > C++**
-   - Path: `<sdk-root>/sysroots/x86_64-oesdk-linux/usr/bin/arm-oe-linux-gnueabihf/arm-oe-linux-gnueabihf-g++`
-   - ABI: `arm-linux-generic-elf-32bit`
+2. **Edit > Preferences > Compilers > Add > GCC > C++**
+   - Path: `/opt/poky/1.6.3/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-g++`
+   - ABI: `arm-linux-poky-elf-32bit`
 
-3. **Tools > Options > Qt Versions > Add**
-   - Path: `<sdk-root>/sysroots/x86_64-oesdk-linux/usr/bin/qt5/qmake`
+3. **Edit > Preferences > Qt Versions > Add**
+   - Path: `/opt/poky/1.6.3/sysroots/x86_64-pokysdk-linux/usr/bin/qt5/qmake`
 
-4. **Tools > Options > Kits > Add**
+4. **Edit > Preferences > Kits > Add**
    - Name: `Overo (ARM hardfp)`
    - Device: the Generic Linux Device from step 1
    - Compiler: the cross-compiler from step 2
    - Qt version: the qmake from step 3
-   - Sysroot: `<sdk-root>/sysroots/arm-oe-linux-gnueabihf`
+   - Sysroot: `/opt/poky/1.6.3/sysroots/cortexa8hf-vfp-neon-poky-linux-gnueabi`
 
 Now you can select the "Overo" kit in any project to cross-compile and deploy
 directly from Qt Creator.
@@ -216,7 +213,7 @@ SOURCES  += main.cpp
 ### Build and deploy
 
 ```bash
-source /usr/local/oecore-x86_64/environment-setup-arm-oe-linux-gnueabihf
+source /opt/poky/1.6.3/environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi
 qmake hello-overo.pro
 make
 scp hello-overo root@<overo-ip>:/home/gumstix/
@@ -241,7 +238,7 @@ source /etc/qt5-env.sh
 - Check permissions: run as root or add user to `video` group
 
 **Linker errors about missing libraries**
-- Make sure you sourced the environment: `source environment-setup-arm-oe-linux-gnueabihf`
+- Make sure you sourced the environment: `source environment-setup-cortexa8hf-vfp-neon-poky-linux-gnueabi`
 - Check `$PKG_CONFIG_PATH` points into the SDK sysroot
 
 **"file not recognized: file format not recognized"**
