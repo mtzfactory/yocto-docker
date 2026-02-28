@@ -7,7 +7,7 @@ RDEPENDS_${PN} = "\
     qtbase \
     qtbase-plugins \
     qtdeclarative \
-    qtgraphicaleffects \
+    qtgraphicaleffects-qmlplugins \
     qtimageformats \
     qtsvg \
     qtsvg-plugins \

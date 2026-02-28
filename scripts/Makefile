@@ -34,15 +34,26 @@ deploy:
 	@cp /usr/local/share/yocto-overo/vim_7.4.258.bbappend \
 	  poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend
 	@cp /usr/local/share/yocto-overo/bblayers.conf build/conf/bblayers.conf
+	@mkdir -p poky/meta-gumstix-extras/recipes-graphics/libgles
+	@cp /usr/local/share/yocto-overo/libgles-omap3_percent.bbappend \
+	  poky/meta-gumstix-extras/recipes-graphics/libgles/libgles-omap3_%.bbappend
 	@mkdir -p poky/meta-gumstix-extras/recipes-qt/packagegroups
 	@cp /usr/local/share/yocto-overo/packagegroup-qt5.bb \
 	  poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb
 	@mkdir -p poky/meta-gumstix-extras/recipes-qt/qt5
 	@cp /usr/local/share/yocto-overo/qtbase_percent.bbappend \
 	  poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-bsp/powervr-drivers
+	@cp /usr/local/share/yocto-overo/omap3-sgx-modules_4.05.00.03.bbappend \
+	  poky/meta-gumstix-extras/recipes-bsp/powervr-drivers/omap3-sgx-modules_4.05.00.03.bbappend
 	@mkdir -p poky/meta-gumstix-extras/recipes-images/gumstix
 	@cp /usr/local/share/yocto-overo/gumstix-console-image.bbappend \
 	  poky/meta-gumstix-extras/recipes-images/gumstix/gumstix-console-image.bbappend
+	@mkdir -p poky/meta-gumstix-extras/recipes-kernel/linux/files
+	@cp /usr/local/share/yocto-overo/linux-gumstix_3.5.7.bbappend \
+	  poky/meta-gumstix-extras/recipes-kernel/linux/linux-gumstix_3.5.7.bbappend
+	@cp /usr/local/share/yocto-overo/0036-Add-missing-SGX-header.patch \
+	  poky/meta-gumstix-extras/recipes-kernel/linux/files/0036-Add-missing-SGX-header.patch
 
 .PHONY: build
 build: check-env no-root-user deploy

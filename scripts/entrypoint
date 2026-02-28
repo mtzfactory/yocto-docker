@@ -1,4 +1,17 @@
 #!/bin/bash
+
+# Populate working directory from staging if empty (bind mount hides image contents)
+if [ ! -d "poky" ]; then
+    echo "Initializing yocto workspace from image..."
+    cp -a /opt/yocto-src/. .
+fi
+
+# Initialize build directory if needed
+if [ ! -d "build/conf" ]; then
+    echo "Initializing build environment..."
+    bash -c 'source poky/oe-init-build-env'
+fi
+
 # Deploy files that may be hidden by volume/bind mounts
 cp /usr/local/share/yocto/Makefile ./Makefile 2>/dev/null || true
 

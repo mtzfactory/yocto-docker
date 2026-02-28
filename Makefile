@@ -19,7 +19,20 @@ volume:
 		docker volume create ${YOCTO_VOLUME_NAME}; \
 	fi
 
-run: build volume
+SDK_BIN := Graphics_SDK_setuplinux_hardfp_5_01_01_02.bin
+SDK_SRC := $(realpath ../docs/gumstix/opengl/$(SDK_BIN))
+
+prepare:
+	@if [ -n "${YOCTO_HOST_DIR}" ]; then \
+		mkdir -p "${YOCTO_HOST_DIR}/build/downloads"; \
+		cp -n "$(SDK_SRC)" "${YOCTO_HOST_DIR}/build/downloads/$(SDK_BIN)" 2>/dev/null || true; \
+		touch "${YOCTO_HOST_DIR}/build/downloads/$(SDK_BIN).done"; \
+		echo "SDK binary staged in downloads/"; \
+	else \
+		echo "Warning: YOCTO_HOST_DIR not set, skipping SDK binary staging"; \
+	fi
+
+run: build volume prepare
 	@if [ -n "${YOCTO_HOST_DIR}" ]; then \
 		mkdir -p "${YOCTO_HOST_DIR}"; \
 		MOUNT_ARG="-v ${YOCTO_HOST_DIR}:/home/yocto"; \

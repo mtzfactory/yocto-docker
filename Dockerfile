@@ -88,6 +88,15 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
   python && \
   rm -rf /var/lib/apt/lists/*;
 
+# Rebuild git against OpenSSL (LP#1444656: GnuTLS 2.12 cannot handshake
+# with modern TLS servers; the stock git uses libcurl-gnutls)
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends libcurl4-openssl-dev libexpat1-dev && \
+  curl -fsSL https://github.com/git/git/archive/v2.9.5.tar.gz | tar xz -C /tmp && \
+  make -C /tmp/git-2.9.5 prefix=/usr NO_TCLTK=1 NO_GETTEXT=1 all -j$(nproc) && \
+  make -C /tmp/git-2.9.5 prefix=/usr NO_TCLTK=1 NO_GETTEXT=1 install && \
+  rm -rf /tmp/git-2.9.5 /var/lib/apt/lists/*;
+
 # Misc utils
 COPY scripts/backup_images /usr/local/bin
 RUN chmod a+x /usr/local/bin/backup_images;
@@ -115,9 +124,10 @@ RUN create_user;
 # Use yocto directory
 WORKDIR ${YOCTO_DIR}
 
-# Copy repo from previous build
-COPY --from=yocto_repo ${YOCTO_REPO} .
-RUN chown -R ${USERNAME}:${GROUP} .;
+# Copy repo from previous build to staging area
+# (bind-mounted /home/yocto hides image contents at runtime)
+COPY --from=yocto_repo ${YOCTO_REPO} /opt/yocto-src
+RUN chown -R ${USERNAME}:${GROUP} /opt/yocto-src;
 
 # Rewrite git:// to https:// globally (git protocol deprecated by GitHub etc.)
 RUN git config --system url."https://".insteadOf "git://"
@@ -125,9 +135,7 @@ RUN git config --system url."https://".insteadOf "git://"
 # Switch to user
 USER ${USERNAME}
 
-# Init build environment
 ENV TEMPLATECONF=meta-gumstix-extras/conf
-RUN source poky/oe-init-build-env;
 
 # Copy overo customization templates (deployed by guest Makefile before builds)
 COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
@@ -146,8 +154,16 @@ COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb
   /usr/local/share/yocto-overo/packagegroup-qt5.bb
 COPY overo/poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend \
   /usr/local/share/yocto-overo/qtbase_percent.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-graphics/libgles/libgles-omap3_%.bbappend \
+  /usr/local/share/yocto-overo/libgles-omap3_percent.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-bsp/powervr-drivers/omap3-sgx-modules_4.05.00.03.bbappend \
+  /usr/local/share/yocto-overo/omap3-sgx-modules_4.05.00.03.bbappend
 COPY overo/poky/meta-gumstix-extras/recipes-images/gumstix/gumstix-console-image.bbappend \
   /usr/local/share/yocto-overo/gumstix-console-image.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-kernel/linux/linux-gumstix_3.5.7.bbappend \
+  /usr/local/share/yocto-overo/linux-gumstix_3.5.7.bbappend
+COPY overo/poky/meta-gumstix-extras/recipes-kernel/linux/files/0036-Add-missing-SGX-header.patch \
+  /usr/local/share/yocto-overo/0036-Add-missing-SGX-header.patch
 
 # Stage Makefile for entrypoint deployment
 COPY scripts/Makefile /usr/local/share/yocto/Makefile
