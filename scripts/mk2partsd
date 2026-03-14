@@ -1,0 +1,57 @@
+#! /bin/sh
+#
+# (c) Copyright 2014 Gumstix, Inc.
+# Licensed under terms of GPLv2
+#
+# Based on mk2PartSDCard.sh from Texas Instrument
+# http://processors.wiki.ti.com/index.php/How_to_Make_3_Partition_SD_Card
+#
+# example usage: $ sudo mk2partsd /dev/sdb
+
+DRIVE=$1
+
+if [ -z "$DRIVE" ]; then
+	echo "Usage: $(basename $0) /dev/sdX"
+	exit 1
+fi
+
+# Reject partition paths — require a whole disk device
+if echo "$DRIVE" | grep -qE '[0-9]$'; then
+	echo "Error: $DRIVE looks like a partition, not a whole disk."
+	echo "Usage: $(basename $0) /dev/sdX  (e.g. /dev/sda, not /dev/sda1)"
+	exit 1
+fi
+
+# Determine partition naming: /dev/sda1 vs /dev/mmcblk0p1
+if echo "$DRIVE" | grep -qE 'mmcblk|nvme|loop'; then
+	PART="${DRIVE}p"
+else
+	PART="${DRIVE}"
+fi
+
+# Unmount any mounted partitions on this drive
+for part in ${PART}[0-9]*; do
+	if grep -q "$part" /proc/mounts 2>/dev/null; then
+		echo "Unmounting $part"
+		umount "$part" || { echo "Failed to unmount $part"; exit 1; }
+	fi
+done
+
+dd if=/dev/zero of=$DRIVE bs=1024 count=1024
+
+SIZE=`fdisk -l $DRIVE | grep Disk | awk '{print $5}'`
+
+echo DISK SIZE - $SIZE bytes
+
+sfdisk --force $DRIVE << EOF
+128,130944,0x0C,*
+131072,,,-
+EOF
+
+# Re-read partition table
+partprobe $DRIVE
+sleep 1
+
+mkfs.vfat -F 32 -n "boot" ${PART}1
+mkfs.ext3 -L "rootfs" ${PART}2
+
