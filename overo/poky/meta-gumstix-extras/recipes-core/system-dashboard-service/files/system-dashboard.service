@@ -1,0 +1,19 @@
+[Unit]
+Description=System Dashboard Qt5 Application
+After=multi-user.target
+ConditionPathExists=/home/gumstix/system-dashboard
+
+[Service]
+Type=simple
+User=gumstix
+Environment="QT_QPA_PLATFORM=linuxfb"
+Environment="QT_QPA_FB_DEVICE=/dev/fb0"
+Environment="QT_QUICK_BACKEND=software"
+Environment="TSLIB_TSDEVICE=/dev/input/event0"
+Environment="QT_QPA_FB_TSLIB=1"
+ExecStart=/home/gumstix/system-dashboard
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

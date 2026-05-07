@@ -19,6 +19,7 @@ endif
 deploy:
 	@cp /usr/local/share/yocto-overo/local.conf build/conf/local.conf
 	@cp /usr/local/share/yocto-overo/bblayers.conf build/conf/bblayers.conf
+	@cp -r /usr/local/share/yocto-overo/poky/. poky/
 	
 .PHONY: build
 build: check-env no-root-user deploy

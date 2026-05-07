@@ -140,6 +140,7 @@ ENV TEMPLATECONF=meta-gumstix-extras/conf
 # Copy overo customization templates (deployed by guest Makefile before builds)
 COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
 COPY overo/build/conf/bblayers.conf /usr/local/share/yocto-overo/bblayers.conf
+COPY overo/poky/ /usr/local/share/yocto-overo/poky/
 
 # Stage Makefile for entrypoint deployment
 COPY scripts/Makefile /usr/local/share/yocto/Makefile
