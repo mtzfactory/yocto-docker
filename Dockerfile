@@ -40,7 +40,7 @@ RUN git config --global user.email "200234+mtzfactory@users.noreply.github.com" 
   git config --global url."https://".insteadOf "git://"
 
 # Clone yocto manifest
-RUN repo init -u "git://github.com/mtzfactory/yocto-manifest.git" -b daisy-qt5 && \
+RUN repo init -u "git://github.com/mtzfactory/yocto-manifest.git" -b morty && \
   repo sync;
 
 CMD ["/bin/bash"]
@@ -139,33 +139,7 @@ ENV TEMPLATECONF=meta-gumstix-extras/conf
 
 # Copy overo customization templates (deployed by guest Makefile before builds)
 COPY overo/build/conf/local.conf /usr/local/share/yocto-overo/local.conf
-COPY overo/poky/meta-gumstix-extras/recipes-graphics/raw2rgbpnm/raw2rgbpnm_git.bb \
-  /usr/local/share/yocto-overo/raw2rgbpnm_git.bb
-COPY overo/poky/meta-gumstix-extras/recipes-devtools/ltrace/ltrace_git.bbappend \
-  /usr/local/share/yocto-overo/ltrace_git.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-support/serial-utils/serial-forward_git.bbappend \
-  /usr/local/share/yocto-overo/serial-forward_git.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-core/packagegroups/packagegroup-cli-tools.bbappend \
-  /usr/local/share/yocto-overo/packagegroup-cli-tools.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-support/vim/vim_7.4.258.bbappend \
-  /usr/local/share/yocto-overo/vim_7.4.258.bbappend
 COPY overo/build/conf/bblayers.conf /usr/local/share/yocto-overo/bblayers.conf
-COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5.bb \
-  /usr/local/share/yocto-overo/packagegroup-qt5.bb
-COPY overo/poky/meta-gumstix-extras/recipes-qt/packagegroups/packagegroup-qt5-toolchain-target.bbappend \
-  /usr/local/share/yocto-overo/packagegroup-qt5-toolchain-target.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-qt/qt5/qtbase_%.bbappend \
-  /usr/local/share/yocto-overo/qtbase_percent.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-graphics/libgles/libgles-omap3_%.bbappend \
-  /usr/local/share/yocto-overo/libgles-omap3_percent.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-bsp/powervr-drivers/omap3-sgx-modules_4.05.00.03.bbappend \
-  /usr/local/share/yocto-overo/omap3-sgx-modules_4.05.00.03.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-images/gumstix/gumstix-console-image.bbappend \
-  /usr/local/share/yocto-overo/gumstix-console-image.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-kernel/linux/linux-gumstix_3.5.7.bbappend \
-  /usr/local/share/yocto-overo/linux-gumstix_3.5.7.bbappend
-COPY overo/poky/meta-gumstix-extras/recipes-kernel/linux/files/0036-Add-missing-SGX-header.patch \
-  /usr/local/share/yocto-overo/0036-Add-missing-SGX-header.patch
 
 # Stage Makefile for entrypoint deployment
 COPY scripts/Makefile /usr/local/share/yocto/Makefile
